@@ -56,15 +56,15 @@ if [ "$SSHFS_CUPS" == "1" ]; then
     #$WP_CONTENT"
 
     # use sshfs to mount the remote filesystem
-#    echo "$FS_PASS" | \
-#        sshfs "$FS_USER@$FS_HOST:" \
-#            "/home/vcap/sharedfs" \
-#            -o port=$FS_PORT \
-#            -o uid=$(id -u vcap) \
-#            -o gid=$(id -g vcap) \
-#            -o password_stdin \
-#            -o reconnect \
-#            -o sshfs_debug $SSHFS_OPTS
+    echo "$FS_PASS" | \
+        sshfs "$FS_USER@$FS_HOST:" \
+            "/home/vcap/sharedfs" \
+            -o port=$FS_PORT \
+            -o uid=$(id -u vcap) \
+            -o gid=$(id -g vcap) \
+            -o password_stdin \
+            -o reconnect \
+            -o sshfs_debug $SSHFS_OPTS
     df -h # just for debugging purposes
 
     # copy WP original files to sshfs, -u makes it skip if remote is newer

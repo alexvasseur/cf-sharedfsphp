@@ -31,7 +31,7 @@ The ``cf logs --recent cfsharedfs`` will show you what happened and show the res
 The SSHFS script is in .profile.d/setup.sh . The Cloud Foundry stager does execute all *.sh in ./profile.d/ - this is a feature usually leveraged in buildpacks but that your app can also leverage this.
 
 The shell script is parsing ``VCAP_SERVICE`` JSON using ``jq`` which is also included by default in the Cloud Foundry container.
-Read the script for more information - [url]
+Read the script for more information - [https://github.com/avasseur-pivotal/cf-sharedfsphp/blob/master/.profile.d/setup.sh]
 
 
 ## Pros / Cons of SSHFS
