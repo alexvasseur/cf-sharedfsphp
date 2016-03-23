@@ -1,0 +1,9 @@
+---
+applications:
+- name: cfsharedfsphp
+  memory: 40M
+  instances: 1
+  buildpack: php_buildpack
+  domain: cfapps.semea.piv
+  services:
+    - sshfs
