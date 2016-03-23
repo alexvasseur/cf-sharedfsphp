@@ -18,20 +18,23 @@ You can check a Java app doing the same with equivalent techniques at [https://g
 You can review manifest.yml and use the deploy.sh script which creates a user provided service
 ```
 cf create-user-provided-service sshfs -p '{"host":"192.168.1.5", "username":"ubuntu", "password":"password", "port":"22"}'
+# this also support "path":"/home/vcap/sharedfs" (default)
 
 cf push
 
 cf ssh cfsharedfs
-  ls /home/vcap/sshfs
+  ls /home/vcap/sharedfs
+
+cf scale -i 2
 ```
 The ``cf logs --recent cfsharedfs`` will show you what happened and show the result of ``df -h`` as which will show the SSHFS filesystem
 
 ## Key design points
 
-The SSHFS script is in .profile.d/setup.sh . The Cloud Foundry stager does execute all *.sh in ./profile.d/ - this is a feature usually leveraged in buildpacks but that your app can also leverage this.
+The SSHFS script is in .profile.d/setup_sshfs.sh . The Cloud Foundry stager does execute all *.sh in ./profile.d/ - this is a feature usually leveraged in buildpacks but that your app can also leverage this.
 
 The shell script is parsing ``VCAP_SERVICE`` JSON using ``jq`` which is also included by default in the Cloud Foundry container.
-Read the script for more information - [https://github.com/avasseur-pivotal/cf-sharedfsphp/blob/master/.profile.d/setup.sh]
+Read the script for more information - [https://github.com/avasseur-pivotal/cf-sharedfsphp/blob/master/.profile.d/setup_sshfs.sh]
 
 
 ## Pros / Cons of SSHFS

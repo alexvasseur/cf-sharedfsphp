@@ -4,6 +4,9 @@
 #   Author:  Daniel Mikusa <dmikusa@pivotal.io>
 #     Date:  4/23/2015
 #
+#   Changed by Alexandre Vasseur (2016)
+#     Make it generic and use of jq to parse VCAP_SERVICES on a cups
+#
 set -eo pipefail
 
 # Do not "exit 0" as this will also exit the container staging process
@@ -37,44 +40,38 @@ if [ "$SSHFS_CUPS" == "1" ]; then
     echo "Found SSHFS bound to app."
 
     # get credentials from the first bound sshfs service
-    FS_HOST=$(echo $VCAP_SERVICES | jq 'to_entries|map(select(.key|contains("user-provided")))[0]|.value[0].credentials.host')
-    FS_USER=$(echo $VCAP_SERVICES | jq 'to_entries|map(select(.key|contains("user-provided")))[0]|.value[0].credentials.user')
-    FS_PASS=$(echo $VCAP_SERVICES | jq 'to_entries|map(select(.key|contains("user-provided")))[0]|.value[0].credentials.password')
-    FS_PORT=$(echo $VCAP_SERVICES | jq 'to_entries|map(select(.key|contains("user-provided")))[0]|.value[0].credentials.port')
+    FS_HOST=$(echo $VCAP_SERVICES | jq -r 'to_entries|map(select(.key|contains("user-provided")))[0]|.value[0].credentials.host')
+    FS_USER=$(echo $VCAP_SERVICES | jq -r 'to_entries|map(select(.key|contains("user-provided")))[0]|.value[0].credentials.username')
+    FS_PASS=$(echo $VCAP_SERVICES | jq -r 'to_entries|map(select(.key|contains("user-provided")))[0]|.value[0].credentials.password')
+    FS_PORT=$(echo $VCAP_SERVICES | jq -r 'to_entries|map(select(.key|contains("user-provided")))[0]|.value[0].credentials.port')
+    FS_PATH=$(echo $VCAP_SERVICES | jq -r 'to_entries|map(select(.key|contains("user-provided")))[0]|.value[0].credentials.path')
 
     echo "Done parsing credentials"
     echo " host: $FS_HOST"
-
-    # path to wp-content directory, this is where we mount the sshfs
-    #WP_CONTENT="$HOME/htdocs/wp-content"
-
-    # move WP defaults to /tmp to save a copy
-    #mv "$WP_CONTENT" /tmp/wp-content
+    if [ "$FS_PATH" == "null" ]; then
+      FS_PATH="/home/vcap/sharedfs"
+      echo " path: $FS_PATH (default)"
+    else
+      echo " path: $FS_PATH" 
+    fi
 
     # create a directory where we can mount sshfs
-    mkdir -p "/home/vcap/sharedfs"
-    #$WP_CONTENT"
+    mkdir -p "$FS_PATH"
 
     # use sshfs to mount the remote filesystem
     echo "$FS_PASS" | \
         sshfs "$FS_USER@$FS_HOST:" \
-            "/home/vcap/sharedfs" \
+            "$FS_PATH" \
             -o port=$FS_PORT \
-            -o uid=$(id -u vcap) \
-            -o gid=$(id -g vcap) \
+            -o idmap=user \
             -o password_stdin \
             -o reconnect \
             -o sshfs_debug $SSHFS_OPTS
+
     df -h # just for debugging purposes
 
-    # copy WP original files to sshfs, -u makes it skip if remote is newer
-    #rsync -rtvu /tmp/wp-content/ $(dirname "$WP_CONTENT")
-
-    # remove WP original files
-    #rm -rf /tmp/wp-content
-
     # write a warning file to sshfs, in case someone looks at the mount directly
-    WF="/home/vcap/sharedfs/ WARNING_DO_NOT_EDIT_THIS_DIRECTORY"
+    WF="$FS_PATH/ WARNING_DO_NOT_EDIT_THIS_DIRECTORY"
     echo "!! WARNING !! DO NOT EDIT FILES IN THIS DIRECTORY!!\n" > "$WF"
     echo "These files are managed by a WordPress instance running " >> "$WF"
     echo "on CloudFoundry.  Editing them directly may break things " >> "$WF"
