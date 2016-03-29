@@ -1,0 +1,50 @@
+    {
+      "app-autoscaler": [
+        {
+          "name": "mydemo-autoscaler",
+          "label": "app-autoscaler",
+          "tags": [
+            "cfapi",
+            "runtime",
+            "autoscaling"
+          ],
+          "plan": "bronze",
+          "credentials": {}
+        }
+      ],
+      "user-provided": [
+        {
+          "name": "saml-sp",
+          "label": "user-provided",
+          "tags": [],
+          "credentials": {
+            "sp-entityid": "https://mydemo.cfapps.domain.fr/saml"
+          },
+          "syslog_drain_url": ""
+        },
+        {
+          "name": "sshfs",
+          "label": "user-provided",
+          "tags": [],
+          "credentials": {
+            "host": "sshfs.nfs.lab.domain.fr",
+            "password": "mypassword",
+            "port": "22",
+            "username": "myusername"
+          },
+          "syslog_drain_url": ""
+        },
+        {
+          "name": "saml-idp",
+          "label": "user-provided",
+          "tags": [],
+          "credentials": {
+            "idp-cert-cn-alias": "lab.domain.fr",
+            "idp-entityid": "https://lab.domain.fr:8443/nidp/saml2/metadata",
+            "idp-slourl": "https://lab.domain.fr:8443/nidp/saml2/slo",
+            "idp-url": "https://lab.domain.fr:8443/nidp/saml2/sso"
+          },
+          "syslog_drain_url": ""
+        }
+      ]
+    }

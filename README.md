@@ -15,7 +15,8 @@ You can check a Java app doing the same with equivalent techniques at [https://g
 
 ## Quickstart
 
-You can review manifest.yml and use the deploy.sh script which creates a user provided service
+You can review manifest.yml and use the deploy.sh script which creates a user provided service.
+It will be detected if the name of the user-provided-service instance contains ``sshfs``
 ```
 cf create-user-provided-service sshfs -p '{"host":"192.168.1.5", "username":"ubuntu", "password":"password", "port":"22"}'
 # this also support "path":"/home/vcap/sharedfs" (default)

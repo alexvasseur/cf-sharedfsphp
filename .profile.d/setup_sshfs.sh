@@ -6,6 +6,7 @@
 #
 #   Changed by Alexandre Vasseur (2016)
 #     Make it generic and use of jq to parse VCAP_SERVICES on a cups
+#     Will detect if user provided service name contains sshfs
 #
 set -eo pipefail
 
@@ -34,17 +35,16 @@ fi
 echo "Checking for VCAP_SERVICES sshfs"
 echo $VCAP_SERVICES
 
-SSHFS_CUPS=$(echo $VCAP_SERVICES | jq 'to_entries|map(select(.key|contains("user-provided")))[0]|.value[0].name' | grep "sshfs" | wc -l)
+SSHFS_CUPS=$(echo $VCAP_SERVICES | jq 'to_entries|map(select(.key|contains("user-provided")))[0].value|map(select(.name|contains("sshfs")))[0].name' | grep -c "sshfs")
 
 if [ "$SSHFS_CUPS" == "1" ]; then
     echo "Found SSHFS bound to app."
 
     # get credentials from the first bound sshfs service
-    FS_HOST=$(echo $VCAP_SERVICES | jq -r 'to_entries|map(select(.key|contains("user-provided")))[0]|.value[0].credentials.host')
-    FS_USER=$(echo $VCAP_SERVICES | jq -r 'to_entries|map(select(.key|contains("user-provided")))[0]|.value[0].credentials.username')
-    FS_PASS=$(echo $VCAP_SERVICES | jq -r 'to_entries|map(select(.key|contains("user-provided")))[0]|.value[0].credentials.password')
-    FS_PORT=$(echo $VCAP_SERVICES | jq -r 'to_entries|map(select(.key|contains("user-provided")))[0]|.value[0].credentials.port')
-    FS_PATH=$(echo $VCAP_SERVICES | jq -r 'to_entries|map(select(.key|contains("user-provided")))[0]|.value[0].credentials.path')
+    FS_HOST=$(echo $VCAP_SERVICES | jq -r 'to_entries|map(select(.key|contains("user-provided")))[0].value|map(select(.name|contains("sshfs")))[0].credentials.username')
+    FS_USER=$(echo $VCAP_SERVICES | jq -r 'to_entries|map(select(.key|contains("user-provided")))[0].value|map(select(.name|contains("sshfs")))[0].credentials.password')
+    FS_PASS=$(echo $VCAP_SERVICES | jq -r 'to_entries|map(select(.key|contains("user-provided")))[0].value|map(select(.name|contains("sshfs")))[0].credentials.port')
+    FS_PATH=$(echo $VCAP_SERVICES | jq -r 'to_entries|map(select(.key|contains("user-provided")))[0].value|map(select(.name|contains("sshfs")))[0].credentials.path')
 
     echo "Done parsing credentials"
     echo " host: $FS_HOST"
