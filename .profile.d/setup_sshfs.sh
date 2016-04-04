@@ -41,9 +41,10 @@ if [ "$SSHFS_CUPS" == "1" ]; then
     echo "Found SSHFS bound to app."
 
     # get credentials from the first bound sshfs service
-    FS_HOST=$(echo $VCAP_SERVICES | jq -r 'to_entries|map(select(.key|contains("user-provided")))[0].value|map(select(.name|contains("sshfs")))[0].credentials.username')
-    FS_USER=$(echo $VCAP_SERVICES | jq -r 'to_entries|map(select(.key|contains("user-provided")))[0].value|map(select(.name|contains("sshfs")))[0].credentials.password')
-    FS_PASS=$(echo $VCAP_SERVICES | jq -r 'to_entries|map(select(.key|contains("user-provided")))[0].value|map(select(.name|contains("sshfs")))[0].credentials.port')
+    FS_HOST=$(echo $VCAP_SERVICES | jq -r 'to_entries|map(select(.key|contains("user-provided")))[0].value|map(select(.name|contains("sshfs")))[0].credentials.host')
+    FS_USER=$(echo $VCAP_SERVICES | jq -r 'to_entries|map(select(.key|contains("user-provided")))[0].value|map(select(.name|contains("sshfs")))[0].credentials.username')
+    FS_PASS=$(echo $VCAP_SERVICES | jq -r 'to_entries|map(select(.key|contains("user-provided")))[0].value|map(select(.name|contains("sshfs")))[0].credentials.password')
+    FS_PORT=$(echo $VCAP_SERVICES | jq -r 'to_entries|map(select(.key|contains("user-provided")))[0].value|map(select(.name|contains("sshfs")))[0].credentials.port')
     FS_PATH=$(echo $VCAP_SERVICES | jq -r 'to_entries|map(select(.key|contains("user-provided")))[0].value|map(select(.name|contains("sshfs")))[0].credentials.path')
 
     echo "Done parsing credentials"
