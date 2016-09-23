@@ -20,6 +20,8 @@ It will be detected if the name of the user-provided-service instance contains `
 ```
 cf create-user-provided-service sshfs -p '{"host":"192.168.1.5", "username":"ubuntu", "password":"password", "port":"22"}'
 # this also support "path":"/home/vcap/sharedfs" (default)
+# and also "dest":"/home/someuser/somefolder" (that will then point to /home/someuser/somefolder/servicename on your remote storage)
+#    that folder MUST exist before as /home/someuser/somefolder/servicename 
 
 cf push
 

@@ -59,9 +59,16 @@ if [ "$SSHFS_CUPS" == "1" ]; then
     # create a directory where we can mount sshfs
     mkdir -p "$FS_PATH"
 
+	## target DEST on the remote - with service name
+	## must be created before
+        #DEST=$(echo $VCAP_APPLICATION | jq .application_name)
+        DEST_PATH=$(echo $VCAP_SERVICES | jq -r 'to_entries|map(select(.key|contains("user-provided")))[0].value|map(select(.name|contains("sshfs")))[0].credentials.dest')
+        DEST=$(echo $VCAP_SERVICES | jq -r 'to_entries|map(select(.key|contains("user-provided")))[0].value|map(select(.name|contains("sshfs")))[0].name')
+	echo " destination on remote: $DEST_PATH/$DEST"
+
     # use sshfs to mount the remote filesystem
     echo "$FS_PASS" | \
-        sshfs "$FS_USER@$FS_HOST:" \
+        sshfs "$FS_USER@$FS_HOST:$DEST_PATH/$DEST" \
             "$FS_PATH" \
             -o port=$FS_PORT \
             -o idmap=user \
@@ -74,7 +81,7 @@ if [ "$SSHFS_CUPS" == "1" ]; then
     # write a warning file to sshfs, in case someone looks at the mount directly
     WF="$FS_PATH/ WARNING_DO_NOT_EDIT_THIS_DIRECTORY"
     echo "!! WARNING !! DO NOT EDIT FILES IN THIS DIRECTORY!!\n" > "$WF"
-    echo "These files are managed by a WordPress instance running " >> "$WF"
+    echo "These files are managed by a service instance and application instance running " >> "$WF"
     echo "on CloudFoundry.  Editing them directly may break things " >> "$WF"
     echo " and changes may be overwritten the next time the " >> "$WF"
     echo "application is staged on CloudFoundry.\n" >> "$WF"
